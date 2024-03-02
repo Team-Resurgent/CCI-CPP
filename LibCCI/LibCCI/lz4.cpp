@@ -16,8 +16,6 @@ typedef struct _UserPtr
 typedef unsigned char (*GET_BYTE) (PUserPtr user);
 typedef void (*SEND_BYTES) (uint8_t* data, uint32_t numBytes, PUserPtr user);
 
-constexpr auto CCI_LZ4_HISTORY_SIZE = 2560;
-
 uint8_t getByteFromIn(PUserPtr user)
 {
 	if (user->dataInPos == user->dataInSize)
@@ -171,12 +169,12 @@ bool lz4::unpackLZ4Data(uint8_t* history, uint32_t historySize, uint8_t* inputBu
 	padding = inputBuffer[0];
 
 	memset(&user, 0, sizeof(user));
-	user.dataIn = inputBuffer + 1;
-	user.dataInSize = inputBufferSize - (padding + 1);
+	user.dataIn = inputBuffer;
+	user.dataInSize = inputBufferSize;
 	user.dataOut = outputBuffer;
 	user.dataOutSize = outputBufferSize;
 
-	bool result = decompress(history, CCI_LZ4_HISTORY_SIZE, getByteFromIn, sendBytesToOut, &user);
+	bool result = decompress(history, historySize, getByteFromIn, sendBytesToOut, &user);
 	*decompressedSize = user.dataOutPos;
 	return result;
 }

@@ -2,10 +2,37 @@
 //
 
 #include <iostream>
+#include <fstream>
+
+#include "cciDecoder.h"
 
 int main()
 {
+    auto decoder = new cciDecoder();
+    decoder->open("G:\\Xbox360\\007.1.cci");
+
+    std::ofstream outputFile("G:\\Xbox360\\test.bin", std::ios::binary); // Open file in binary mode
+    if (!outputFile.is_open()) {
+        std::cerr << "Error opening file!" << std::endl;
+        return 1;
+    }
+
+    auto sectorBuffer = reinterpret_cast<uint8_t*>(malloc(2048));
+
+    auto totalSectors = decoder->getTotalSectors();
+    for (auto i = 0U; i < totalSectors; i++)
+    {
+        //std::cout << ("Sector " + std::to_string(i) + "\n");
+        decoder->readSector(i, sectorBuffer, 2048);
+        outputFile.write(reinterpret_cast<char*>(sectorBuffer), 2048);
+    }
+    
+    outputFile.close();
+
+    decoder->close();
+
     std::cout << "Hello World!\n";
+    return 1;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
